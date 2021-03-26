@@ -1,0 +1,35 @@
+﻿@page "/insert-shelve"
+@using SharedModels
+
+<MudText Typo="Typo.h5">Change Shalve</MudText>
+
+<EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <MudCard>
+        <MudCardContent>
+            <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+                <MudTextField T="string" @bind-Value="model.Name" For="@(() => model.Name)" Label="Name" HelperText="Item name"/>
+
+                <MudTextField T="decimal" @bind-Value="model.Quantity" For="@(() => model.Quantity)" Label="Quantity" />
+
+                <MudDatePicker Label="Expiration Date" @bind-Date="model.ExpirationTime" For="@(() => model.ExpirationTime)"></MudDatePicker>
+            </MudForm>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success)" Class="ml-auto">Register</MudButton>
+        </MudCardActions>
+    </MudCard>
+</EditForm>
+
+@code {
+    bool success;
+    string[] errors = { };
+    MudForm form;
+    ShelveItem model = new ShelveItem();
+
+    private void OnValidSubmit(EditContext context)
+    {
+        success = true;
+        StateHasChanged();
+    }
+}
