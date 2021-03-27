@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SharedModels
 {
-    public class ShelveItem //: IValidatableObject
+    public class ShelveItem: IValidatableObject
     {
         [Required]
         public string Name { get; set; }
@@ -15,9 +15,10 @@ namespace SharedModels
         [Required]
         public DateTime? ExpirationTime { get; set; }
 
-        //public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        //{
-        //    Validator.TryValidateValue(Name, validationContext, )
-        //}
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            //    Validator.TryValidateValue(Name, validationContext, )
+            return null;
+        }
     }
 }
