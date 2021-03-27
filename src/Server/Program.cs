@@ -15,14 +15,19 @@ namespace Server
         public static Task Main()
         {
             var host = new HostBuilder()
+                .ConfigureAppConfiguration(c =>
+                {
+                    c.AddEnvironmentVariables();
+                })
                 .ConfigureServices(services =>
                 {
                     services.AddLogging();
                     services.AddOptions<TableStorageOptions>()
                         .Configure<IConfiguration>((settings, configuration) =>
                         {
-                            settings.TableName = Environment.GetEnvironmentVariable("TableStorage:TableName");
-                            settings.StorageAccount = Environment.GetEnvironmentVariable("TableStorage:StorageAccount");
+                            configuration.GetSection("TableStorage").Bind(settings);
+                            //settings.TableName = Environment.GetEnvironmentVariable("TableStorage:TableName");
+                            //settings.StorageAccount = Environment.GetEnvironmentVariable("TableStorage:StorageAccount");
                         });
                     services.AddSingleton<ITableStorageService, TableStorageService>(sp =>
                         new TableStorageService(sp.GetService<ILogger<TableStorageService>>(), sp.GetService<IOptions<TableStorageOptions>>()));

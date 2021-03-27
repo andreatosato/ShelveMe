@@ -62,7 +62,7 @@ namespace Server.Services
             where T : class, ITableEntity, new()
         {
             Page<T> response = new();
-            var tableResponse = client.QueryAsync<T>(t => t.PartitionKey == partitionKey && t.RowKey == rowKey, maxPerPage: take, cancellationToken: cancellationToken);
+            var tableResponse = client.QueryAsync<T>(t => t.PartitionKey == partitionKey && t.RowKey == rowKey, cancellationToken: cancellationToken);
             await foreach (var page in tableResponse.AsPages(continuationTokenPage, take))
             {
                 response = new Page<T>
