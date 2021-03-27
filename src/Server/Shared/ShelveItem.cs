@@ -4,8 +4,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SharedModels
 {
-    public class ShelveItem: IValidatableObject
+    public class ShelveItem: IValidatableObject, IClientEntity
     {
+        public string PartitionKey { get; init; }
+        public string RowKey { get; init; }
+
         [Required]
         public string Name { get; set; }
 

@@ -23,7 +23,7 @@ namespace Client.Services
 
         public async Task InsertShelveItemAsync(ShelveItem item)
         {
-            await storageClient.PostAsJsonAsync("insert", item);
+            await storageClient.PostAsJsonAsync("StorageInsert", item);
         }
 
         public Task<List<ShelveItem>> ReadShelveItemsAsync(ShelveItem item, int take, int skip)

@@ -1,5 +1,6 @@
 ﻿using Azure.Data.Tables;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SharedModels;
 using System;
 using System.Collections.Generic;
@@ -11,19 +12,19 @@ using System.Threading.Tasks;
 
 namespace Server.Services
 {
-    public class TableStorageService
+    public class TableStorageService : ITableStorageService
     {
         private readonly TableClient client;
         private readonly ILogger<TableStorageService> logger;
 
-        public TableStorageService(ILogger<TableStorageService> logger, string connectionString, string tableName)
+        public TableStorageService(ILogger<TableStorageService> logger, IOptions<TableStorageOptions> options)
         {
-            client = new TableClient(connectionString, tableName);
+            client = new TableClient(options.Value.StorageAccount, options.Value.TableName);
             client.CreateIfNotExists();
             this.logger = logger;
         }
 
-        public async Task CreateEntity<T>(T entity, CancellationToken cancellationToken)
+        public async Task CreateEntityAsync<T>(T entity, CancellationToken cancellationToken)
             where T: class, ITableEntity, new()
         {
             var response = await client.AddEntityAsync<T>(entity, cancellationToken: cancellationToken);
@@ -34,7 +35,7 @@ namespace Server.Services
             }
         }
 
-        public async Task UpdateEntity<T>(T entity, CancellationToken cancellationToken)
+        public async Task UpdateEntityAsync<T>(T entity, CancellationToken cancellationToken)
             where T : class, ITableEntity, new()
         {
             var response = await client.UpsertEntityAsync<T>(entity, TableUpdateMode.Replace, cancellationToken: cancellationToken);
@@ -45,7 +46,7 @@ namespace Server.Services
             }
         }
 
-        public async Task DeleteEntity<T>(T entity, CancellationToken cancellationToken)
+        public async Task DeleteEntityAsync<T>(T entity, CancellationToken cancellationToken)
             where T : class, ITableEntity, new()
         {
             var response = await client.DeleteEntityAsync(entity.PartitionKey, entity.RowKey, cancellationToken: cancellationToken);
@@ -63,10 +64,10 @@ namespace Server.Services
             var tableResponse = client.QueryAsync<T>(t => t.PartitionKey == partitionKey && t.RowKey == rowKey, maxPerPage: take, cancellationToken: cancellationToken);
             await foreach (var page in tableResponse.AsPages(continuationTokenPage, take))
             {
-                response = new Page<T> 
+                response = new Page<T>
                 {
                     Values = page.Values,
-                    ContinuationToken = page.ContinuationToken 
+                    ContinuationToken = page.ContinuationToken
                 };
             }
             return response;

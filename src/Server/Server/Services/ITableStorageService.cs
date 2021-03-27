@@ -9,12 +9,18 @@ using System.Threading.Tasks;
 
 namespace Server.Services
 {
-    public interface ITableStorageService<T>
-        where T: class, ITableEntity, new()
+    public interface ITableStorageService
     {
-        Task CreateEntity(T entity, CancellationToken cancellationToken);
-        Task UpdateEntity(T entity, CancellationToken cancellationToken);
-        Task DeleteEntity(T entity, CancellationToken cancellationToken);
-        Task<Page<T>> QueryAsync(string partitionKey, string rowKey, int take, string continuationTokenPage = null, CancellationToken cancellationToken = default);
+        Task CreateEntityAsync<T>(T entity, CancellationToken cancellationToken = default) where T : class, ITableEntity, new();
+        Task UpdateEntityAsync<T>(T entity, CancellationToken cancellationToken = default) where T : class, ITableEntity, new();
+        Task DeleteEntityAsync<T>(T entity, CancellationToken cancellationToken = default) where T : class, ITableEntity, new();
+        Task<Page<T>> QueryAsync<T>(string partitionKey, string rowKey, int take, string continuationTokenPage = null, CancellationToken cancellationToken = default)
+            where T : class, ITableEntity, new();
+    }
+
+    public class TableStorageOptions
+    {
+        public string StorageAccount { get; set; }
+        public string TableName { get; set; }
     }
 }
