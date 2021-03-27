@@ -12,15 +12,17 @@ namespace Server
 {
     public class Program
     {
-        public static void Main()
+        public static Task Main()
         {
-            var host = new HostBuilder()                
+            var host = new HostBuilder()
                 .ConfigureServices(services =>
                 {
+                    services.AddLogging();
                     services.AddOptions<TableStorageOptions>()
                         .Configure<IConfiguration>((settings, configuration) =>
                         {
-                            configuration.GetSection("TableStorage").Bind(settings);
+                            settings.TableName = Environment.GetEnvironmentVariable("TableStorage:TableName");
+                            settings.StorageAccount = Environment.GetEnvironmentVariable("TableStorage:StorageAccount");
                         });
                     services.AddSingleton<ITableStorageService, TableStorageService>(sp =>
                         new TableStorageService(sp.GetService<ILogger<TableStorageService>>(), sp.GetService<IOptions<TableStorageOptions>>()));
@@ -29,9 +31,10 @@ namespace Server
                 .Build();
 
 
-            host.Run();
+            return host.RunAsync();
 
             // func host start --verbose
+            // https://techcommunity.microsoft.com/t5/apps-on-azure/preview-creating-azure-functions-using-net-5/ba-p/2156846
         }
     }
 }

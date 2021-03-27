@@ -1,9 +1,12 @@
 ﻿@page "/insert-shelve"
 @using SharedModels
+@using Services
+@inject ISnackbar Snackbar
+@inject IStorage storage 
 
 <MudText Typo="Typo.h5">Change Shalve</MudText>
 
-<EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+<EditForm Model="@model" OnValidSubmit="ValidFormSubmitted" OnInvalidSubmit="InvalidFormSubmitted">
     <DataAnnotationsValidator />
     <MudCard>
         <MudCardContent>
@@ -16,10 +19,15 @@
             </MudForm>
         </MudCardContent>
         <MudCardActions>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success)" Class="ml-auto">Register</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@Confirm">Confirm</MudButton>
         </MudCardActions>
     </MudCard>
 </EditForm>
+
+@foreach (var item in errors)
+{
+    <li>item</li>
+}
 
 @code {
     bool success;
@@ -27,9 +35,25 @@
     MudForm form;
     ShelveItem model = new ShelveItem();
 
-    private void OnValidSubmit(EditContext context)
+    async Task ValidFormSubmitted(EditContext editContext)
     {
         success = true;
+        await Confirm();
         StateHasChanged();
+    }
+
+    void InvalidFormSubmitted(EditContext editContext)
+    {
+        success = false;
+        StateHasChanged();
+    }
+
+    public async Task Confirm()
+    {
+        await storage.InsertShelveItemAsync(model);
+        Snackbar.Add("You have save item", Severity.Success, config =>
+        {
+            config.ShowCloseIcon = false;
+        });
     }
 }

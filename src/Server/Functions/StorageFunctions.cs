@@ -29,10 +29,11 @@ namespace Server
             var item = await JsonSerializer.DeserializeAsync<ShelveItem>(req.Body);
             logger.LogDebug("Storage to insert {@item}", item);
 
-            await tableStorageService.CreateEntityAsync(ShelveItemEntity.FromClientEntity(item));
+            var entity = ShelveItemEntity.FromClientEntity(item);
+            await tableStorageService.CreateEntityAsync(entity);
 
-            var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteAsJsonAsync(item);
+            var response = req.CreateResponse(HttpStatusCode.Created);
+            await response.WriteAsJsonAsync(entity);
             return response;
         }
     }

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ namespace Server.Services
             where T: class, ITableEntity, new()
         {
             var response = await client.AddEntityAsync<T>(entity, cancellationToken: cancellationToken);
-            if (response.Status != 200 && response.Status != 201)
+            if (!(response.Status >= 200 && response.Status <= 299))
             {
                 logger.LogError(await new StreamReader(response.ContentStream).ReadToEndAsync());
                 throw new Exception(response.ReasonPhrase);
@@ -39,7 +40,7 @@ namespace Server.Services
             where T : class, ITableEntity, new()
         {
             var response = await client.UpsertEntityAsync<T>(entity, TableUpdateMode.Replace, cancellationToken: cancellationToken);
-            if (response.Status != 200 && response.Status != 201)
+            if (!(response.Status >= 200 && response.Status <= 299))
             {
                 logger.LogError(await new StreamReader(response.ContentStream).ReadToEndAsync());
                 throw new Exception(response.ReasonPhrase);
@@ -50,7 +51,7 @@ namespace Server.Services
             where T : class, ITableEntity, new()
         {
             var response = await client.DeleteEntityAsync(entity.PartitionKey, entity.RowKey, cancellationToken: cancellationToken);
-            if (response.Status != 200 && response.Status != 201)
+            if (!(response.Status >= 200 && response.Status <= 299))
             {
                 logger.LogError(await new StreamReader(response.ContentStream).ReadToEndAsync());
                 throw new Exception(response.ReasonPhrase);
