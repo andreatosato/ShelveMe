@@ -2,7 +2,7 @@
 {
     public interface IClientEntity
     {
-        public string PartitionKey { get; init; }
-        public string RowKey { get; init; }
+        public string PartitionKey { get; set; }
+        public string RowKey { get; set; }
     }
 }

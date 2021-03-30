@@ -2,16 +2,23 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Attach to .NET Functions",
+            "name": "Functions",
             "type": "coreclr",
             "request": "attach",
             "processId": "${command:azureFunctions.pickProcess}"
         },
         {
-            "name": "Launch and Debug Standalone Blazor WebAssembly App",
+            "name": "Blazor",
             "type": "blazorwasm",
             "request": "launch",
             "cwd": "${workspaceFolder}/src/Client"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Server/Client",
+            "configurations": ["Functions", "Blazor"],
+            "preLaunchTask": "${defaultBuildTask}"
         }
     ]
 }

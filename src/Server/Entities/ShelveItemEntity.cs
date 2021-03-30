@@ -14,11 +14,11 @@ namespace Server.Entities
         public ETag ETag { get; set; }
         #endregion
 
-        public string Name { get; init; }
+        public string Name { get; set; }
 
-        public decimal Quantity { get; init; }
+        public double Quantity { get; set; }
 
-        public DateTime? ExpirationTime { get; init; }
+        public DateTime? ExpirationTime { get; set; }
 
         public static ShelveItemEntity FromClientEntity(IClientEntity entity)
         {
@@ -26,9 +26,9 @@ namespace Server.Entities
             return new ShelveItemEntity
             {
                 PartitionKey = client.PartitionKey,
-                RowKey = client.RowKey,
+                RowKey = string.IsNullOrEmpty(entity.RowKey) ? Guid.NewGuid().ToString("N") : entity.RowKey,
                 Name = client.Name,
-                Quantity = client.Quantity,
+                Quantity = (double)client.Quantity,
                 ExpirationTime = client.ExpirationTime
             };
         }

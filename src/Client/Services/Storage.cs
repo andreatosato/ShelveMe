@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Client.Services
@@ -15,25 +16,38 @@ namespace Client.Services
         {
             storageClient = client;
         }
+        public ShelveItem EditingCache {get; set;}
 
         public Task DeleteShelveItemAsync(ShelveItem item)
         {
-            throw new NotImplementedException();
+            return storageClient.DeleteAsync($"StorageDelete/{item.PartitionKey}/{item.RowKey}");
         }
 
-        public async Task InsertShelveItemAsync(ShelveItem item)
+        public Task InsertShelveItemAsync(ShelveItem item)
         {
-            await storageClient.PostAsJsonAsync("StorageInsert", item);
+            return storageClient.PostAsJsonAsync("StorageInsert", item);
         }
 
-        public Task<List<ShelveItem>> ReadShelveItemsAsync(ShelveItem item, int take, int skip)
+        public async Task<Page<ShelveItem>> ReadShelveItemsAsync(string username, int? take = null, string? continuationTokenReader = null)
         {
-            throw new NotImplementedException();
+            var response = await storageClient.PostAsJsonAsync("StorageGet", new PageRequest {
+                PartitionKey = username,
+                Take = take ?? 0,
+                ContinuationToken = continuationTokenReader
+            });
+            
+            response.EnsureSuccessStatusCode();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            if(stream.Length == 0)
+                return null;
+
+            return await JsonSerializer.DeserializeAsync<Page<ShelveItem>>(await response.Content.ReadAsStreamAsync());
         }
 
         public Task UpdateShelveItemAsync(ShelveItem item)
         {
-            throw new NotImplementedException();
+            return storageClient.PutAsJsonAsync("StorageUpdate", item);
         }
     }
 }

@@ -1,0 +1,67 @@
+@page "/pages/list-shelve"
+@using SharedModels
+@using Services
+@inject ISnackbar Snackbar
+@inject IStorage storage 
+@inject IUser userService 
+@inject NavigationManager navigationManger 
+
+<MudText Typo="Typo.h5">Shelve list</MudText>
+
+<MudGrid>
+@foreach (var item in Shelves)
+{
+    <MudItem xs="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderAvatar>
+                    <MudAvatar Color="Color.Secondary">@(item.Name.Substring(0,1))</MudAvatar>
+                </CardHeaderAvatar>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.body1">@item.Name</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="6">Quantity:</MudItem>
+                    <MudItem xs="6"><MudText>@item.Quantity</MudText></MudItem>
+                    @if(item.ExpirationTime.HasValue)
+                    {
+                        <MudItem xs="6">Expiration Date</MudItem>
+                        <MudItem xs="6"><MudText>@item.ExpirationTime</MudText></MudItem>
+                    }
+                </MudGrid>
+            </MudCardContent>
+            <MudCardActions>
+                <MudFab Icon="@Icons.Material.Filled.Edit" Color="Color.Default" Label="Edit" Class="ma-2" OnClick="() => Edit(item)" />
+                <MudFab Icon="@Icons.Material.Filled.Share" Color="Color.Error" Label="Delete" OnClick="@(async () => await Delete(item))" Class="ma-2" />
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+}
+</MudGrid>
+
+@code {
+    
+    public List<ShelveItem> Shelves = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await userService.GetUserAsync();
+        var shelves = await storage.ReadShelveItemsAsync(user.UserId);
+        if(shelves.Values.Any())
+            Shelves = shelves.Values.ToList();
+    }
+
+    void Edit(ShelveItem item)
+    {
+        storage.EditingCache = item;
+        navigationManger.NavigateTo("/pages/update-shelve/true");
+    }
+
+    async Task Delete(ShelveItem item)
+    {
+        await storage.DeleteShelveItemAsync(item);
+        StateHasChanged();
+    }
+}

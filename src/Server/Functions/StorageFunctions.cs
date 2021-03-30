@@ -14,7 +14,7 @@ namespace Server
     public class ItemsFunctions
     {
         private readonly ITableStorageService tableStorageService;
-
+        private static JsonSerializerOptions JsonOptions = new JsonSerializerOptions {PropertyNameCaseInsensitive = true};
         public ItemsFunctions(ITableStorageService tableStorageService)
         {
             this.tableStorageService = tableStorageService;
@@ -27,14 +27,14 @@ namespace Server
         {
             var logger = executionContext.GetLogger("StorageInsert");
             
-            var item = await JsonSerializer.DeserializeAsync<ShelveItem>(req.Body);
+            var item = await JsonSerializer.DeserializeAsync<ShelveItem>(req.Body, JsonOptions);
             logger.LogDebug("Storage to insert {@item}", item);
 
             var entity = ShelveItemEntity.FromClientEntity(item);
-            await tableStorageService.CreateEntityAsync(entity);
+            var entityInserted = await tableStorageService.CreateEntityAsync(entity);
 
             var response = req.CreateResponse(HttpStatusCode.Created);
-            await response.WriteAsJsonAsync(entity);
+            await response.WriteAsJsonAsync(entityInserted);
             return response;
         }
 
@@ -45,7 +45,7 @@ namespace Server
         {
             var logger = executionContext.GetLogger("StorageUpdate");
             
-            var item = await JsonSerializer.DeserializeAsync<ShelveItem>(req.Body);
+            var item = await JsonSerializer.DeserializeAsync<ShelveItem>(req.Body, JsonOptions);
             logger.LogDebug("Storage to update {@item}", item);
 
             var entity = ShelveItemEntity.FromClientEntity(item);
@@ -58,19 +58,16 @@ namespace Server
 
         [Function("StorageDelete")]
         public async Task<HttpResponseData> DeleteAsync(
-            [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "StorageDelete")] HttpRequestData req,
+            [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "StorageDelete/{partitionKey}/{rowKey}")] HttpRequestData req,
+            string partitionKey,
+            string rowKey,
             FunctionContext executionContext)
         {
             var logger = executionContext.GetLogger("StorageDelete");
             
-            var item = await JsonSerializer.DeserializeAsync<ShelveItem>(req.Body);
-            logger.LogDebug("Storage to delete {@item}", item);
-
-            var entity = ShelveItemEntity.FromClientEntity(item);
-            await tableStorageService.DeleteEntityAsync(entity);
+            await tableStorageService.DeleteEntityAsync(partitionKey, rowKey);
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteAsJsonAsync(entity);
             return response;
         }
 
@@ -81,12 +78,11 @@ namespace Server
         {
             var logger = executionContext.GetLogger("StorageGet");
             
-            var pageRequest = await JsonSerializer.DeserializeAsync<PageRequest>(req.Body);
+            var pageRequest = await JsonSerializer.DeserializeAsync<PageRequest>(req.Body, JsonOptions);
             logger.LogDebug("Storage to delete {@item}", pageRequest);
 
             var result = await tableStorageService.QueryAsync<ShelveItemEntity>(
-                pageRequest.PartitionKey, 
-                pageRequest.RowKey, 
+                pageRequest.PartitionKey,
                 pageRequest.Take, 
                 pageRequest.ContinuationToken);
 

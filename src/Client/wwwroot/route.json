@@ -1,0 +1,34 @@
+{
+	"routes": [
+		{
+			"route": "/login",
+			"serve": "/.auth/login/twitter",
+			"post_login_redirect_uri": "/posttwitterlogin"
+		},
+		{
+			"route": "/logingithub",
+			"serve": "/.auth/login/github",
+			"post_login_redirect_uri": "/posttwitterlogin"
+		},
+		{
+			"route": "/logout",
+			"serve": "/.auth/logout"
+		},
+		{
+			"route": "/api/*",
+			"allowedRoles": [ "anonymous", "authenticated" ]
+		},
+		{
+			"route": "/pages/*",
+			"serve": "/index.html",
+			"statusCode": 200
+		}
+	],
+	"platformErrorOverrides": [
+		{
+			"errorType": "NotFound",
+			"statusCode": "404",
+			"serve": "/errors.html"
+		}
+	]
+}

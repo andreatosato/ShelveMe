@@ -8,9 +8,10 @@ namespace Client.Services
 {
     public interface IStorage
     {
-        Task<List<ShelveItem>> ReadShelveItemsAsync(ShelveItem item, int take, int skip);
+        Task<Page<ShelveItem>> ReadShelveItemsAsync(string username, int? take = null, string? continuationTokenReader = null);
         Task InsertShelveItemAsync(ShelveItem item);
         Task UpdateShelveItemAsync(ShelveItem item);
         Task DeleteShelveItemAsync(ShelveItem item);
+        ShelveItem EditingCache {get; set;}
     }
 }

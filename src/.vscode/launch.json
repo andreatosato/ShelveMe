@@ -1,12 +1,23 @@
 {
-    "version": "0.2.0",
-    "configurations": [
+  "version": "0.2.0",
+  "configurations": [
       {
-        "name": "Attach to .NET Functions",
-        "type": "coreclr",
-        "request": "attach",
-        "processId": "${command:azureFunctions.pickProcess}"
+          "name": "Functions",
+          "type": "coreclr",
+          "request": "attach",
+          "processId": "${command:azureFunctions.pickProcess}"
+      },
+      {
+          "name": "Blazor",
+          "type": "blazorwasm",
+          "request": "launch",
+          "cwd": "${workspaceFolder}/Client"
       }
-    ]
-  }
-  
+  ],
+  "compounds": [
+    {
+        "name": "Server/Client",
+        "configurations": ["Functions", "Blazor"]
+    }
+  ]
+}

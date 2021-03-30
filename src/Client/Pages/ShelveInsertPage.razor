@@ -1,10 +1,13 @@
-﻿@page "/insert-shelve"
+﻿@page "/pages/insert-shelve"
+@page "/pages/update-shelve/{IsEditing:bool}"
 @using SharedModels
 @using Services
 @inject ISnackbar Snackbar
 @inject IStorage storage 
+@inject IUser userService
+@implements IDisposable
 
-<MudText Typo="Typo.h5">Change Shalve</MudText>
+<MudText Typo="Typo.h5">Change Shelve</MudText>
 
 <EditForm Model="@model" OnValidSubmit="ValidFormSubmitted" OnInvalidSubmit="InvalidFormSubmitted">
     <DataAnnotationsValidator />
@@ -34,7 +37,17 @@
     string[] errors = { };
     MudForm form;
     ShelveItem model = new ShelveItem();
-
+    [Parameter] public bool IsEditing {get; set;} = false;
+    
+    
+    protected override async Task OnParametersSetAsync()
+    {
+        if(storage.EditingCache != null)
+            model = storage.EditingCache;
+        else
+            model.PartitionKey = (await userService.GetUserAsync()).UserId;
+    }
+    
     async Task ValidFormSubmitted(EditContext editContext)
     {
         success = true;
@@ -50,10 +63,19 @@
 
     public async Task Confirm()
     {
-        await storage.InsertShelveItemAsync(model);
+        if(!IsEditing)
+            await storage.InsertShelveItemAsync(model);
+        else
+            await storage.UpdateShelveItemAsync(model);
+
         Snackbar.Add("You have save item", Severity.Success, config =>
         {
             config.ShowCloseIcon = false;
         });
+    }
+
+    public void Dispose()
+    {
+        storage.EditingCache = null;
     }
 }

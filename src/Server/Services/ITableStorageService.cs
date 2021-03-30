@@ -11,10 +11,13 @@ namespace Server.Services
 {
     public interface ITableStorageService
     {
-        Task CreateEntityAsync<T>(T entity, CancellationToken cancellationToken = default) where T : class, ITableEntity, new();
+        Task<T> CreateEntityAsync<T>(T entity, CancellationToken cancellationToken = default) where T : class, ITableEntity, new();
         Task UpdateEntityAsync<T>(T entity, CancellationToken cancellationToken = default) where T : class, ITableEntity, new();
-        Task DeleteEntityAsync<T>(T entity, CancellationToken cancellationToken = default) where T : class, ITableEntity, new();
-        Task<Page<T>> QueryAsync<T>(string partitionKey, string rowKey, int take, string continuationTokenPage = null, CancellationToken cancellationToken = default)
+        Task DeleteEntityAsync(string partitionKey, string rowKey, CancellationToken cancellationToken = default);
+        Task<Page<T>> QueryAsync<T>(string partitionKey, int take, string continuationTokenPage, CancellationToken cancellationToken = default)
+            where T : class, ITableEntity, new();
+        
+        Task<List<Page<T>>> QueryAsync<T>(string partitionKey, CancellationToken cancellationToken = default)
             where T : class, ITableEntity, new();
     }
 

@@ -6,8 +6,8 @@ namespace SharedModels
 {
     public class ShelveItem: IValidatableObject, IClientEntity
     {
-        public string PartitionKey { get; init; }
-        public string RowKey { get; init; }
+        public string PartitionKey { get; set; }
+        public string RowKey { get; set; }
 
         [Required]
         public string Name { get; set; }
